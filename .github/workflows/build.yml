@@ -153,14 +153,21 @@ jobs:
     if: ${{ always() && needs.source.outputs.sourcepkg }}
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    name: Build for webassembly
+    name: Build R-${{ matrix.r }} for WebAssembly
+    strategy:
+      fail-fast: false
+      matrix:
+        r: [ 'oldrel', 'release' ]
+    container:
+      image: ghcr.io/r-universe-org/build-wasm${{ matrix.r == 'oldrel' && ':4.3' || '' }}
     steps:
-#      - name: "Restore package library"
-#        uses: actions/cache/restore@v4
-#        with:
-#          path: pkglib
-#          key: ${{ runner.os }}-${{ github.run_id }}-${{github.run_attempt}}
-#          restore-keys: ${{ runner.os }}-${{ github.run_id }}
+      - name: "Restore package library"
+        uses: actions/cache/restore@v4
+        if: matrix.r == 'release'
+        with:
+          path: pkglib
+          key: ${{ runner.os }}-${{ github.run_id }}-${{github.run_attempt}}
+          restore-keys: ${{ runner.os }}-${{ github.run_id }}
       - name: Download source package
         uses: actions/download-artifact@v4
         with:
@@ -168,16 +175,15 @@ jobs:
           path: .
       - id: build
         name: Build wasm binary
-        uses: r-universe-org/build-wasm@master
-        with:
-          sourcepkg: ${{ needs.source.outputs.sourcepkg }}
+        run: /entrypoint.sh
         env:
           GITHUB_PAT: ${{secrets.GITHUB_TOKEN}}
+          SOURCEPKG: ${{ needs.source.outputs.sourcepkg }}
       - name: "Store package files"
         uses: r-universe-org/actions/store-package@v4
         if: ${{ always() && steps.build.outputs.binarypkg }}
         with:
-          name: package-wasm-release
+          name: package-wasm-${{ matrix.r }}
           JOB_STATUS: ${{ job.status }}
           FILE: ${{ steps.build.outputs.binarypkg }}
           TARGET: "wasm"
