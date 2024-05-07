@@ -148,6 +148,42 @@ jobs:
           path: pkglib
           key: ${{ runner.os }}-${{ github.run_id }}-${{github.run_attempt}}
 
+  linux:
+    needs: [prepare, source]
+    if: ${{ always() && needs.source.outputs.sourcepkg }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    name: Build R-${{ matrix.r }} for Linux
+    strategy:
+      fail-fast: false
+      matrix:
+        r: [ 'devel' ]
+    container:
+      image: ghcr.io/r-universe-org/base-image:${{ matrix.r }}
+    steps:
+      - name: Download source package
+        uses: actions/download-artifact@v4
+        with:
+          name: package-source
+          path: .
+      - name: "Build and check binaries"
+        uses: r-universe-org/actions/linux-check@v4
+        id: build
+        timeout-minutes: 60
+        env:
+          GITHUB_PAT: ${{secrets.GITHUB_TOKEN}}
+        with:
+          sourcepkg: ${{ needs.source.outputs.sourcepkg }}
+      - name: "Save binary package"
+        uses: r-universe-org/actions/store-package@v4
+        if: ${{ always() && steps.build.outputs.binarypkg }}
+        with:
+          name: package-linux-${{ matrix.r }}
+          JOB_STATUS: ${{ job.status }}
+          DISTRO: ${{ steps.build.outputs.distro }}
+          FILE: ${{ steps.build.outputs.binarypkg }}
+          TARGET: 'linux'
+
   wasm:
     needs: [prepare, source]
     if: ${{ always() && needs.source.outputs.sourcepkg }}
@@ -300,7 +336,7 @@ jobs:
   deploy:
     name: Deploy to package server
     runs-on: ubuntu-22.04
-    needs: [prepare, source, windows, macos, wasm, docs]
+    needs: [prepare, source, linux, windows, macos, wasm, docs]
     if: ${{ always() && needs.source.outputs.package }}
     outputs:
       deployed_packages: ${{ steps.deployment.outputs.deployed_packages }}
