@@ -183,6 +183,7 @@ jobs:
           JOB_STATUS: ${{ job.status }}
           DISTRO: ${{ steps.build.outputs.distro }}
           FILE: ${{ steps.build.outputs.binarypkg }}
+          CHECKSTATUS: ${{ steps.build.outputs.checkstatus }}
           TARGET: 'linux'
 
   wasm:
@@ -268,6 +269,7 @@ jobs:
           JOB_STATUS: ${{ job.status }}
           DISTRO: windows
           FILE: ${{ steps.buildandcheck.outputs.binarypkg }}
+          CHECKSTATUS: ${{ steps.buildandcheck.outputs.checkstatus }}
           TARGET: windows
 
   macos:
@@ -316,6 +318,7 @@ jobs:
           JOB_STATUS: ${{ job.status }}
           DISTRO: macos
           FILE: ${{ steps.buildandcheck.outputs.binarypkg }}
+          CHECKSTATUS: ${{ steps.buildandcheck.outputs.checkstatus }}
           TARGET: macos
       - name: "Cross compile for MacOS ARM64"
         id: crossbuild
@@ -332,6 +335,7 @@ jobs:
           JOB_STATUS: ${{ job.status }}
           DISTRO: macos
           FILE: ${{ steps.crossbuild.outputs.binarypkg }}
+          CHECKSTATUS: ${{ steps.buildandcheck.outputs.checkstatus }}
           TARGET: macos
 
   deploy:
