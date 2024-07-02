@@ -95,7 +95,7 @@ jobs:
 
   source:
     needs: prepare
-    name: Build source package
+    name: Build source pkg and vignettes
     runs-on: ubuntu-22.04
     timeout-minutes: 90
     outputs:
@@ -113,7 +113,7 @@ jobs:
     steps:
       - id: build
         timeout-minutes: 60
-        name: Build source package
+        name: Build source package (including vignettes)
         uses: r-universe-org/build-source@master
         env:
           MAINTAINERLOGIN: ${{ needs.prepare.outputs.maintainer_login }}
