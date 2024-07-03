@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Find and delete packages
-        uses: r-universe-org/delete-packages@master
+        uses: tempbioc/delete-packages@master
         with:
           universe: ${{ github.event.repository.name }}
         env:

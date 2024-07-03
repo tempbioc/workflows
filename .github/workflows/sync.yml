@@ -8,7 +8,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Sync registry
-        uses: r-universe-org/sync@master
+        uses: tempbioc/sync@master
         with:
           monorepo_url: https://github.com/${{ github.repository }}
         env:

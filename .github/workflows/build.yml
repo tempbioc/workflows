@@ -31,7 +31,7 @@ jobs:
     steps:
       - id: lookup
         name: Find changed package
-        uses: r-universe-org/actions/find-changes@v4
+        uses: tempbioc/actions/find-changes@v4
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
 #          github-token: ${{secrets.PUBLIC_PAT}}
@@ -43,7 +43,7 @@ jobs:
     needs: [prepare]
     steps:
       - name: Set upstream commit status
-        uses: r-universe-org/commit-status@master
+        uses: tempbioc/commit-status@master
         env:
           GH_APP_KEY: ${{ secrets.GH_APP_KEY }}
         with:
@@ -64,7 +64,7 @@ jobs:
     if: needs.prepare.outputs.build_docs
     steps:
       - name: Build package docs
-        uses: r-universe-org/build-docs@master
+        uses: tempbioc/build-docs@master
         with:
           repo_url: ${{ needs.prepare.outputs.repo_url }}
           subdir: ${{ needs.prepare.outputs.repo_subdir }}
@@ -88,7 +88,7 @@ jobs:
           name: docs-website
       - id: deployment
         name: Upload docs to server
-        uses: r-universe-org/deploy-docs@master
+        uses: tempbioc/deploy-docs@master
         env:
           BUILDLOG: https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}
           GITHUB_PAT: ${{ secrets.GHPAT }}
@@ -114,7 +114,7 @@ jobs:
       - id: build
         timeout-minutes: 60
         name: Build source package (including vignettes)
-        uses: r-universe-org/build-source@master
+        uses: tempbioc/build-source@master
         env:
           MAINTAINERLOGIN: ${{ needs.prepare.outputs.maintainer_login }}
           GITHUB_PAT: ${{secrets.GITHUB_TOKEN}}
@@ -125,7 +125,7 @@ jobs:
           branch: ${{ needs.prepare.outputs.repo_branch }}
           articles: ${{ needs.prepare.outputs.repo_registered }}
       - name: "Store source package"
-        uses: r-universe-org/actions/store-package@v4
+        uses: tempbioc/actions/store-package@v4
         if: ${{ always() && steps.build.outputs.PACKAGE }}
         with:
           name: package-source
@@ -134,7 +134,7 @@ jobs:
           FILE: ${{ steps.build.outputs.SOURCEPKG }}
           TARGET: ${{ steps.build.outputs.SOURCEPKG && 'source' || 'failure' }}
       - name: "Store linux binary package"
-        uses: r-universe-org/actions/store-package@v4
+        uses: tempbioc/actions/store-package@v4
         if: ${{ always() && steps.build.outputs.BINARYPKG }}
         with:
           name: package-linux-release
@@ -168,7 +168,7 @@ jobs:
           name: package-source
           path: .
       - name: "Build and check binaries"
-        uses: r-universe-org/actions/linux-check@v4
+        uses: tempbioc/actions/linux-check@v4
         id: build
         timeout-minutes: 60
         env:
@@ -176,7 +176,7 @@ jobs:
         with:
           sourcepkg: ${{ needs.source.outputs.sourcepkg }}
       - name: "Save binary package"
-        uses: r-universe-org/actions/store-package@v4
+        uses: tempbioc/actions/store-package@v4
         if: ${{ always() && steps.build.outputs.binarypkg }}
         with:
           name: package-linux-${{ matrix.r }}
@@ -218,7 +218,7 @@ jobs:
           GITHUB_PAT: ${{secrets.GITHUB_TOKEN}}
           SOURCEPKG: ${{ needs.source.outputs.sourcepkg }}
       - name: "Store package files"
-        uses: r-universe-org/actions/store-package@v4
+        uses: tempbioc/actions/store-package@v4
         if: ${{ always() && steps.build.outputs.binarypkg }}
         with:
           name: package-wasm-${{ matrix.r }}
@@ -239,12 +239,12 @@ jobs:
     steps:
       - name: Install R
         timeout-minutes: 10
-        uses: r-universe-org/actions/setup-r@v4
+        uses: tempbioc/actions/setup-r@v4
         id: install-r
         with:
           r-version: ${{ matrix.r }}
       - name: "Prepare build tools"
-        uses: r-universe-org/actions/windows-prep@v4
+        uses: tempbioc/actions/windows-prep@v4
         with:
           java: ${{ needs.source.outputs.java }}
           jags: ${{ needs.source.outputs.jags }}
@@ -254,7 +254,7 @@ jobs:
           name: package-source
           path: .
       - name: "Build and check binaries"
-        uses: r-universe-org/actions/windows-check@v4
+        uses: tempbioc/actions/windows-check@v4
         id: buildandcheck
         timeout-minutes: 60
         env:
@@ -262,7 +262,7 @@ jobs:
         with:
           sourcepkg: ${{ needs.source.outputs.sourcepkg }}
       - name: "Save binary package"
-        uses: r-universe-org/actions/store-package@v4
+        uses: tempbioc/actions/store-package@v4
         if: ${{ always() && steps.buildandcheck.outputs.binarypkg }}
         with:
           name: package-windows-${{ matrix.r }}
@@ -284,14 +284,14 @@ jobs:
         r: [ 'release', 'oldrel' ]
     steps:
       - name: Prepare macOS system
-        uses: r-universe-org/actions/macos-prep@v4
+        uses: tempbioc/actions/macos-prep@v4
         with:
           version: ${{ matrix.r }}
           fortran: ${{ needs.source.outputs.fortran }}
           jags: ${{ needs.source.outputs.jags }}
       - name: Install R
         timeout-minutes: 10
-        uses: r-universe-org/actions/setup-r@v4
+        uses: tempbioc/actions/setup-r@v4
         id: install-r
         with:
           r-version: ${{ matrix.r }}
@@ -301,7 +301,7 @@ jobs:
           name: package-source
           path: .
       - name: "Build and check binaries"
-        uses: r-universe-org/actions/macos-check@v4
+        uses: tempbioc/actions/macos-check@v4
         id: buildandcheck
         timeout-minutes: 60
         env:
@@ -311,7 +311,7 @@ jobs:
           java: ${{ needs.source.outputs.java }}
           jags: ${{ needs.source.outputs.jags }}
       - name: "Save binary package"
-        uses: r-universe-org/actions/store-package@v4
+        uses: tempbioc/actions/store-package@v4
         if: ${{ always() && steps.buildandcheck.outputs.binarypkg }}
         with:
           name: package-macos-${{ matrix.r }}
@@ -323,13 +323,13 @@ jobs:
       - name: "Cross compile for MacOS ARM64"
         id: crossbuild
         if: always() && env.R_HOME_CROSS && steps.buildandcheck.outputs.hasplatform
-        uses: r-universe-org/actions/macos-cross@v4
+        uses: tempbioc/actions/macos-cross@v4
         with:
           sourcepkg: ${{ needs.source.outputs.sourcepkg }}
           cargo: ${{ needs.source.outputs.cargo }}
       - name: "Save binary package for MacOS ARM64"
         if: always() && steps.crossbuild.outputs.binarypkg
-        uses: r-universe-org/actions/store-package@v4
+        uses: tempbioc/actions/store-package@v4
         with:
           name: package-macos-${{ matrix.r }}-arm64
           JOB_STATUS: ${{ job.status }}
@@ -350,7 +350,7 @@ jobs:
         uses: actions/download-artifact@v4
       - id: deployment
         name: Upload packages to server
-        uses: r-universe-org/deploy-packages@master
+        uses: tempbioc/deploy-packages@master
         env:
           CRANLIKEURL: https://${{ github.event.repository.name }}.r-universe.dev/packages
           CRANLIKEPWD: ${{ secrets.CRANLIKEPWD }}
@@ -364,7 +364,7 @@ jobs:
           VERSION: ${{ needs.source.outputs.version }}
       - name: Report deployment failures in slack
         if: failure()
-        uses: r-universe-org/actions/post-slack@v4
+        uses: tempbioc/actions/post-slack@v4
         env:
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
           DEPLOY_STATUS: ${{ steps.deployment.outcome }}
@@ -376,7 +376,7 @@ jobs:
     if: always()
     steps:
       - name: Set upstream commit status
-        uses: r-universe-org/commit-status@master
+        uses: tempbioc/commit-status@master
         env:
           GH_APP_KEY: ${{ secrets.GH_APP_KEY }}
           GITHUB_PAT: ${{secrets.GHPAT}}
