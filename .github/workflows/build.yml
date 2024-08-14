@@ -320,23 +320,6 @@ jobs:
           FILE: ${{ steps.buildandcheck.outputs.binarypkg }}
           CHECKSTATUS: ${{ steps.buildandcheck.outputs.checkstatus }}
           TARGET: macos
-      - name: "Cross compile for MacOS ARM64"
-        id: crossbuild
-        if: always() && env.R_HOME_CROSS && steps.buildandcheck.outputs.hasplatform
-        uses: tempbioc/actions/macos-cross@v4
-        with:
-          sourcepkg: ${{ needs.source.outputs.sourcepkg }}
-          cargo: ${{ needs.source.outputs.cargo }}
-      - name: "Save binary package for MacOS ARM64"
-        if: always() && steps.crossbuild.outputs.binarypkg
-        uses: tempbioc/actions/store-package@v4
-        with:
-          name: package-macos-${{ matrix.r }}-arm64
-          JOB_STATUS: ${{ job.status }}
-          DISTRO: macos
-          FILE: ${{ steps.crossbuild.outputs.binarypkg }}
-          CHECKSTATUS: ${{ steps.buildandcheck.outputs.checkstatus }}
-          TARGET: macos
 
   deploy:
     name: Deploy to package server
