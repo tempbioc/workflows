@@ -281,7 +281,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        r: [ 'release', 'oldrel' ]
+        r: [ 'devel', 'release' ]
     steps:
       - name: Prepare macOS system
         uses: tempbioc/actions/macos-prep@v4
