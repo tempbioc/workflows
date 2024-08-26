@@ -235,7 +235,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        r: [ 'devel', 'release', 'oldrel' ]
+        r: [ 'devel', 'release' ]
     steps:
       - name: Install R
         timeout-minutes: 10
